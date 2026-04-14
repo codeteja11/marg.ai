@@ -1,1 +1,1 @@
-# marg.ai
+# marg.ai An AI-powered web application built using the MERN Stack (MongoDB, Express.js, React.js, Node.js). This project provides an interactive platform where users can leverage AI features seamlessly through a modern and responsive interface.
