@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@theme {
+  --font-inter: "Inter", sans-serif;
+  --color-slate-950: #1a0a2e; /* Vibrant Deep Purple */
+  --color-amber-400: #fbc531; /* Bright Vedic Yellow */
+  --color-orange-500: #e67e22; /* Saffron Orange */
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+}
+
+@utility glass-card {
+  background-color: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@utility glass-panel {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@utility animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-inter);
+  background-color: #1a0a2e;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(91, 33, 182, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(76, 29, 149, 0.3) 0%, transparent 40%),
+    linear-gradient(135deg, #1a0a2e 0%, #2d135d 50%, #1a0a2e 100%);
+  color: white;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1a0a2e; 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(251, 197, 49, 0.3); 
+  border-radius: 10px;
+}

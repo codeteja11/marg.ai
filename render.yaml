@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: marg-ai-unified
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: "cd ../client && npm install && npm run build && cd ../server && npm install"
+    startCommand: "npm start"
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PORT
+        value: 5000
