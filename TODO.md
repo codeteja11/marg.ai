@@ -1,11 +1,12 @@
-# Git Setup TODO
+# Git Setup TODO - COMPLETE
 
 ## Plan Progress
-- [x] Step 1: Install Git for Windows (downloaded installer; run git-installer.exe manually with /VERYSILENT if possible)
-- [ ] Step 2: Verify `git --version`
-- [ ] Step 3: `git init`
-- [ ] Step 4: `git add . && git commit -m "Initial commit"`
-- [ ] Step 5: Test project (optional)
+- [x] Step 1: Install Git ✓
+- [x] Step 2: Verify git --version ✓
+- [x] Step 3: git init ✓
+- [x] Step 4: git add/commit "Initial commit" ✓ (2591 files)
+- [x] Step 5: .gitignore created (excludes node_modules/etc.) ✓
 
-Updated after each step.
+**Next**: Test server (`npm run dev`), client (`npm run dev`), push to GitHub (`git branch -M main && git push`).
 
+Updated: .gitignore added, deps installing.
