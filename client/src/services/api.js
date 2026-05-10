@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-// Auto-detect production vs development API URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// Use same-origin by default so production deployments work without extra env vars.
+// If you still set VITE_API_BASE_URL, it will override this.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -1,12 +1,10 @@
-# Git Setup TODO - COMPLETE
+# TODO
 
-## Plan Progress
-- [x] Step 1: Install Git ✓
-- [x] Step 2: Verify git --version ✓
-- [x] Step 3: git init ✓
-- [x] Step 4: git add/commit "Initial commit" ✓ (2591 files)
-- [x] Step 5: .gitignore created (excludes node_modules/etc.) ✓
+- [x] Fix production API base URL handling (use relative URL by default)
 
-**Next**: Test server (`npm run dev`), client (`npm run dev`), push to GitHub (`git branch -M main && git push`).
+- [ ] Remove relaxed CSP (currently `contentSecurityPolicy: false`) or set strict CSP in `server/server.js`
+- [ ] Harden auth: move from `localStorage` token to cookie-based JWT (requires coordinated changes in server + client)
+- [ ] Provide instructions for rotating secrets already in hosting env vars and forcing password reset
+- [ ] Build + test locally (client build + server start)
+- [ ] Update deployment notes for permanent hosting (Render/Vercel)
 
-Updated: .gitignore added, deps installing.
