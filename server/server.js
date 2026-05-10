@@ -34,11 +34,11 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Routes
-const authRoutes = require('./routes/authRoutes');
-const aiRoutes = require('./routes/aiRoutes');
+//const authRoutes = require('./routes/authRoutes');
+//const aiRoutes = require('./routes/aiRoutes');
 
-app.use('/api/auth', authRoutes);
-app.use('/api/ai', aiRoutes);
+//app.use('/api/auth', authRoutes);
+//app.use('/api/ai', aiRoutes);//
 
 // Database Global State
 global.dbMode = 'mongodb';
