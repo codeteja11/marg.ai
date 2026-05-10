@@ -9,6 +9,7 @@ async function findUser(email) {
     if (global.dbMode === 'fallback') {
         return await global.mockDB.users.findOne({ email });
     }
+
     return await User.findOne({ email });
 }
 
@@ -18,38 +19,75 @@ async function saveUser(userData) {
         const newUser = await global.mockDB.users.insert(userData);
         return { id: newUser._id, ...newUser };
     }
+
     const user = new User(userData);
     await user.save();
     return user;
 }
+
+// TEST ROUTE
+router.get('/test', (req, res) => {
+    res.send('Auth route working');
+});
 
 // @route   POST /api/auth/register
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        // Check if user exists
+        // Check if user already exists
         let user = await findUser(email);
+
         if (user) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({
+                message: 'User already exists'
+            });
         }
 
-        // Encrypt password
+        // Hash password
         const salt = await bcrypt.genSalt(10);
-        const hashedEmoji = await bcrypt.hash(password, salt);
 
-        // Save
-        const newUser = await saveUser({ name, email, password: hashedEmoji });
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Return JWT
-        const payload = { user: { id: newUser.id } };
-        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }, (err, token) => {
-            if (err) throw err;
-            res.status(201).json({ token, user: { id: newUser.id, name: newUser.name, email: newUser.email } });
+        // Save user
+        const newUser = await saveUser({
+            name,
+            email,
+            password: hashedPassword
         });
+
+        // JWT payload
+        const payload = {
+            user: {
+                id: newUser.id || newUser._id
+            }
+        };
+
+        // Generate token
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' },
+            (err, token) => {
+                if (err) throw err;
+
+                res.status(201).json({
+                    token,
+                    user: {
+                        id: newUser.id || newUser._id,
+                        name: newUser.name,
+                        email: newUser.email
+                    }
+                });
+            }
+        );
+
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server error');
+
+        res.status(500).json({
+            message: 'Server error'
+        });
     }
 });
 
@@ -60,26 +98,57 @@ router.post('/login', async (req, res) => {
 
         // Check if user exists
         let user = await findUser(email);
+
         if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({
+                message: 'Invalid credentials'
+            });
         }
 
         // Compare password
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(
+            password,
+            user.password
+        );
+
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({
+                message: 'Invalid credentials'
+            });
         }
 
-        // Return JWT
-        const id = user.id || user._id;
-        const payload = { user: { id } };
-        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' }, (err, token) => {
-            if (err) throw err;
-            res.status(200).json({ token, user: { id, name: user.name, email: user.email } });
-        });
+        // JWT payload
+        const payload = {
+            user: {
+                id: user.id || user._id
+            }
+        };
+
+        // Generate token
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' },
+            (err, token) => {
+                if (err) throw err;
+
+                res.status(200).json({
+                    token,
+                    user: {
+                        id: user.id || user._id,
+                        name: user.name,
+                        email: user.email
+                    }
+                });
+            }
+        );
+
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server error');
+
+        res.status(500).json({
+            message: 'Server error'
+        });
     }
 });
 
