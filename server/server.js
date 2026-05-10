@@ -33,7 +33,7 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
- Routes
+ //Routes
 const authRoutes = require('./routes/authRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 
