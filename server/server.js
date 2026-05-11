@@ -13,77 +13,124 @@ dotenv.config();
 
 const app = express();
 
+// FIX FOR RENDER PROXY
+app.set('trust proxy', 1);
+
 // Security Middlewares
-app.use(helmet({
-  contentSecurityPolicy: false, // Relaxed CSP for unified deployment compatibility
-  crossOriginEmbedderPolicy: false
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
+
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json());
-app.use(cors({
-  exposedHeaders: ['Bypass-Tunnel-Reminder']
-}));
+
+app.use(
+  cors({
+    origin: '*',
+    exposedHeaders: ['Bypass-Tunnel-Reminder'],
+  })
+);
 
 // Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again after 15 minutes'
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests from this IP, please try again after 15 minutes',
 });
+
 app.use('/api/', limiter);
 
- //Routes
+// ================= ROUTES =================
 const authRoutes = require('./routes/authRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
 
-// Database Global State
+// TEST ROUTE
+app.get('/api/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API working successfully',
+  });
+});
+
+// ================= DATABASE =================
 global.dbMode = 'mongodb';
 global.mockDB = null;
 
 // Health Check
 app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'online',
-        mode: global.dbMode,
-        database: global.dbMode === 'mongodb' ? (mongoose.connection.readyState === 1 ? 'connected' : 'disconnected') : 'active (zero-config)',
-        timestamp: new Date()
-    });
+  res.json({
+    status: 'online',
+    mode: global.dbMode,
+    database:
+      global.dbMode === 'mongodb'
+        ? mongoose.connection.readyState === 1
+          ? 'connected'
+          : 'disconnected'
+        : 'active (zero-config)',
+    timestamp: new Date(),
+  });
 });
 
-// MongoDB Connection with Auto-Fallback
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/margai';
+// MongoDB Connection with Fallback
+const MONGO_URI =
+  process.env.MONGO_URI || 'mongodb://localhost:27017/margai';
 
-mongoose.connect(MONGO_URI)
-.then(() => {
+mongoose
+  .connect(MONGO_URI)
+  .then(() => {
     console.log('✅ MongoDB connected successfully');
     global.dbMode = 'mongodb';
-})
-.catch((err) => {
-    console.warn('⚠️ Local MongoDB unreachable. Initializing ZERO-CONFIG FALLBACK (NeDB)...');
-    global.dbMode = 'fallback';
-    global.mockDB = {
-        users: Datastore.create({ filename: path.join(__dirname, 'data', 'users.db'), autoload: true }),
-        profiles: Datastore.create({ filename: path.join(__dirname, 'data', 'profiles.db'), autoload: true })
-    };
-    console.log('🚀 ZERO-CONFIG MODE: All features (Register/Login) are now functional using local storage.');
-});
+  })
+  .catch((err) => {
+    console.warn(
+      '⚠️ MongoDB unreachable. Starting fallback database...'
+    );
 
-// SERVE FRONTEND (Production only)
-// 1. Static assets
+    global.dbMode = 'fallback';
+
+    global.mockDB = {
+      users: Datastore.create({
+        filename: path.join(__dirname, 'data', 'users.db'),
+        autoload: true,
+      }),
+
+      profiles: Datastore.create({
+        filename: path.join(__dirname, 'data', 'profiles.db'),
+        autoload: true,
+      }),
+    };
+
+    console.log('🚀 Fallback database active');
+  });
+
+// ================= FRONTEND =================
+
+// Serve frontend static files
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
-// 2. Catch-all: Send all non-API requests to index.html
-app.use((req, res) => {
-  if (req.url.startsWith('/api/')) return res.status(404).json({ message: 'API route not found' });
-  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+// React Catch-All Route
+app.get('*', (req, res) => {
+  // Ignore API routes
+  if (req.originalUrl.startsWith('/api/')) {
+    return res.status(404).json({
+      success: false,
+      message: 'API route not found',
+    });
+  }
+
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
-// Start server
+// ================= SERVER =================
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-    console.log(`📡 Marg.ai Unified Server running on port ${PORT}`);
+  console.log(`📡 Marg.ai Server running on port ${PORT}`);
 });
